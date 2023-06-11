@@ -1,10 +1,10 @@
 
 const mongoose = require("mongoose");
 
-async function connectToMongoDB(userName,password) {
+async function connectToMongoDB(userName,password,db) {
   
   
-  const connectionString = `mongodb+srv://${userName}:${password}@cluster0.ihqmkem.mongodb.net/?retryWrites=true&w=majority`
+  const connectionString = `mongodb+srv://${userName}:${password}@cluster0.ihqmkem.mongodb.net/${db}?retryWrites=true&w=majority`
 
   try {
     await mongoose.connect(connectionString, {

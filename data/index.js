@@ -5,10 +5,10 @@ require("dotenv").config();
 
 const usernamE = process.env.USER_NAME;
 const password = process.env.PASSWORD;
-
+const db = process.env.DB_NAME;
 
 // start connection
-connectToMongoDB(usernamE,password).then((res) => res).catch((res)=>console.log(res));
+connectToMongoDB(usernamE,password,db).then((res) => res).catch((res)=>console.log(res));
 
 const createTodo = async ({ title, desc, checked, date }) => {
   // console.log(title, desc, checked, date);
