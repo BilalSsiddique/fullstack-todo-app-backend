@@ -1,0 +1,41 @@
+{
+  "name": "fullstack-todo-app-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "bson": "^5.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.1.4",
+    "express": "^4.18.2",
+    "ip": "^2.0.0",
+    "memory-pager": "^1.5.0",
+    "mongodb": "^5.6.0",
+    "mongodb-connection-string-url": "^2.6.0",
+    "mongoose": "^7.2.2",
+    "nodemon": "^2.0.22",
+    "punycode": "^2.3.0",
+    "saslprep": "^1.0.3",
+    "smart-buffer": "^4.2.0",
+    "socks": "^2.7.1",
+    "sparse-bitfield": "^3.0.3",
+    "tr46": "^3.0.0",
+    "webidl-conversions": "^7.0.0",
+    "whatwg-url": "^11.0.0"
+  },
+  "scripts": {
+    "start": "nodemon app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BilalSsiddique/fullstack-todo-app-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BilalSsiddique/fullstack-todo-app-backend/issues"
+  },
+  "homepage": "https://github.com/BilalSsiddique/fullstack-todo-app-backend#readme"
+}
