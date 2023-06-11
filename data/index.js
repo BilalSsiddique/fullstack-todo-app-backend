@@ -3,12 +3,12 @@ const connectToMongoDB = require("../config/mongoConnnection");
 const validateTodos = require("../helper");
 require("dotenv").config();
 
-const username = process.env.USER_NAME;
+const usernamE = process.env.USER_NAME;
 const password = process.env.PASSWORD;
 
 
 // start connection
-connectToMongoDB(username,password).then((res) => res).catch((res)=>console.log(res));
+connectToMongoDB(usernamE,password).then((res) => res).catch((res)=>console.log(res));
 
 const createTodo = async ({ title, desc, checked, date }) => {
   // console.log(title, desc, checked, date);
