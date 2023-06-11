@@ -71,8 +71,8 @@ const updateTodo = async (id, todo) => {
   await User.updateOne({ _id: id }, { $set: todo });
 
   const idObj = await getTodoById(id);
-
-  return idObj;
+  
+  return `${idObj[0].title} Updated Successfully`;
 };
 
 const removeTodo = async (id) => {

@@ -99,7 +99,6 @@ router.put("/:id", async (req, res) => {
 
   try {
     const updatedtodo = await updateTodo(id, todo);
-
     res.status(200).json(updatedtodo);
   } catch (e) {
     res.status(400).json({ error: "check for error" });
