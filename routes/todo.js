@@ -48,12 +48,12 @@ router.get("/", async (req, res) => {
   console.log("query", req.query);
   const page = +req.query.currentPage || 1;
   const itemsPerPage = +req.query.itemsPerPage || 5;
-  const token = req.headers.authorization.split(" ")[1];
+  const token = req.headers && req.headers.authorization.split(" ")[1];
   console.log("token in back", token);
 
   const secretKey = process.env.SECRET_KEY;
   console.log('secret key',secretKey)
-  if (token===undefined) {
+  if (!token) {
     console.log('here inside token checnk')
     res.status(409).json("Token not found");
     return
