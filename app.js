@@ -4,8 +4,7 @@ const app = express();
 const todoRoutes = require("./routes/todo");
 const userRoutes = require('./routes/user')
 const port = process.env.PORT || 3000;
-const jwt = require("jsonwebtoken");
-const secretKey = process.env.SECRET_KEY;
+
 
 app.use(express.json());
 
