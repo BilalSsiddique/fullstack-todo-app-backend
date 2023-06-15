@@ -9,7 +9,7 @@ const {
   getTodoById,
   updateTodo,
   removeTodo,
-  getEditTodoById
+  getEditTodoById,
 } = require("../data/index");
 
 router.post("/create-todo", async (req, res) => {
@@ -27,7 +27,7 @@ router.post("/create-todo", async (req, res) => {
     const secretKey = process.env.SECRET_KEY;
     // console.log("request", name, title, desc, checked, date);
     const decoded = validateToken(token, secretKey);
-    console.log("decode", decoded,decoded.userId);
+    console.log("decode", decoded, decoded.userId);
     if (decoded?.userId) {
       const resp = await createTodo({
         userId: decoded.userId,
@@ -48,33 +48,44 @@ router.get("/", async (req, res) => {
   console.log("query", req.query);
   const page = +req.query.currentPage || 1;
   const itemsPerPage = +req.query.itemsPerPage || 5;
-  const token = req.headers && req.headers.authorization.split(" ")[1];
+  const authorizationHeader = req.headers && req.headers.authorization;
+  if (!authorizationHeader) {
+    return res.redirect("/login");
+    // Handle the case where authorization header is missing
+    // For example, return an error response or redirect to a login page
+  }
+  const token = authorizationHeader.split(" ")[1];
   console.log("token in back", token);
-
   const secretKey = process.env.SECRET_KEY;
-  console.log('secret key',secretKey)
+  console.log("secret key", secretKey);
   if (!token) {
-    console.log('here inside token checnk')
+    console.log("here inside token checnk");
     res.status(409).json("Token not found");
-    return
+    return;
   }
   try {
-
-    const decoded =  validateToken(token, secretKey);
-    console.log('decoded',decoded)
+    const decoded = validateToken(token, secretKey);
+    console.log("decoded", decoded);
     if (decoded?.userId) {
       console.log("verify", decoded);
       const resp = await getTodoById(decoded?.userId);
-      console.log('resss7889899989,',resp)
-      if (Array.isArray(resp) && resp.length >= 0 && decoded && Array.isArray(resp[0].todos) ) {
+      console.log("resss7889899989,", resp);
+      if (
+        Array.isArray(resp) &&
+        resp.length >= 0 &&
+        decoded &&
+        Array.isArray(resp[0].todos)
+      ) {
         const lastItemIndex = page * itemsPerPage;
         const firstItemIndex = lastItemIndex - itemsPerPage;
-        console.log('res for todos',resp[0].todos)
-        const numberOfProducts = resp[0].todos.slice(firstItemIndex, lastItemIndex);
+        console.log("res for todos", resp[0].todos);
+        const numberOfProducts = resp[0].todos.slice(
+          firstItemIndex,
+          lastItemIndex
+        );
 
-        
         const totalProductsCount = resp[0].todos.length;
-        console.log('number',numberOfProducts)
+        console.log("number", numberOfProducts);
         res.setHeader("Products-Total-Count", String(totalProductsCount)); // Set the header before sending the response
         res.status(200).json(numberOfProducts);
         return;
@@ -93,36 +104,34 @@ router.get("/:id", async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
   const secretKey = process.env.SECRET_KEY;
 
-  console.log('idLLLL',id,token);
+  console.log("idLLLL", id, token);
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });
   }
   try {
-    const decoded =  validateToken(token, secretKey);
-    console.log('decoded',decoded)
+    const decoded = validateToken(token, secretKey);
+    console.log("decoded", decoded);
     if (decoded?.userId) {
       console.log("verify", decoded);
       const resp = await getTodoById(decoded?.userId);
-      console.log('resss,',resp)
+      console.log("resss,", resp);
       if (Array.isArray(resp) && resp.length >= 0 && decoded.userId) {
-        const [todos] =resp
-        console.log('todos',todos.todos)
-        const filterTodo = todos.todos.filter((todo,index)=>todo._id.toString() === id)
-        console.log('filter',filterTodo)
+        const [todos] = resp;
+        console.log("todos", todos.todos);
+        const filterTodo = todos.todos.filter(
+          (todo, index) => todo._id.toString() === id
+        );
+        console.log("filter", filterTodo);
         res.status(200).json(filterTodo);
-        return
+        return;
+      } else {
+        res.status(404).json("Todo not found");
+        return;
       }
-      else{
-        res.status(404).json('Todo not found')
-        return
-      }
-  }
-  else{
-    res.status(404).json({ error: "Token failed" });
-    return
-  }
-
-
+    } else {
+      res.status(404).json({ error: "Token failed" });
+      return;
+    }
   } catch (e) {
     res.status(404).json({ error: "Todo by id not found" });
   }
@@ -133,7 +142,7 @@ router.put("/:id", async (req, res) => {
   const getTodo = req.body;
   const token = req.headers && req.headers.authorization.split(" ")[1];
   const secretKey = process.env.SECRET_KEY;
-  console.log('check inside edit',id,getTodo,token)
+  console.log("check inside edit", id, getTodo, token);
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });
     return;
@@ -156,14 +165,14 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
-    const decoded =  validateToken(token, secretKey);
-    console.log('decoded',decoded)
-    const {userId} = decoded
+    const decoded = validateToken(token, secretKey);
+    console.log("decoded", decoded);
+    const { userId } = decoded;
     if (userId) {
       console.log("verify,updatij...", decoded);
       // console.log('resss,',resp)
-    const updatedtodo = await updateTodo(userId, getTodo);
-    res.status(200).json(updatedtodo);
+      const updatedtodo = await updateTodo(userId, getTodo);
+      res.status(200).json(updatedtodo);
     }
   } catch (e) {
     res.status(400).json({ error: "check for error" });
@@ -186,14 +195,14 @@ router.delete("/:id", async (req, res) => {
     return;
   }
   try {
-    const decoded =  validateToken(token, secretKey);
-    console.log('decoded',decoded)
-    const {userId} = decoded
+    const decoded = validateToken(token, secretKey);
+    console.log("decoded", decoded);
+    const { userId } = decoded;
     if (userId) {
       console.log("verify,updatij...", decoded);
       // console.log('resss,',resp)
-    const deletedtodo = await removeTodo(id,userId);
-    res.status(200).json(deletedtodo);
+      const deletedtodo = await removeTodo(id, userId);
+      res.status(200).json(deletedtodo);
     }
   } catch (e) {
     res.status(500).json({ error: e });
