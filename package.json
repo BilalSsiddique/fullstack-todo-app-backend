@@ -39,5 +39,9 @@
   "bugs": {
     "url": "https://github.com/BilalSsiddique/fullstack-todo-app-backend/issues"
   },
-  "homepage": "https://github.com/BilalSsiddique/fullstack-todo-app-backend#readme"
+  "homepage": "https://github.com/BilalSsiddique/fullstack-todo-app-backend#readme",
+  "devDependencies": {
+    "@types/express": "^4.17.17",
+    "@types/jsonwebtoken": "^9.0.2"
+  }
 }
