@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
-
+const jwt = require("jsonwebtoken");
+const { validateToken } = require("../helper");
 
 const {
   createTodo,
@@ -8,65 +9,120 @@ const {
   getTodoById,
   updateTodo,
   removeTodo,
+  getEditTodoById
 } = require("../data/index");
-// GET /getData
 
 router.post("/create-todo", async (req, res) => {
+  console.log("inside create-todo", req.body);
   try {
-    const title = req.body.title;
-    const desc = req.body.desc;
-    const checked = req.body.checked;
-    const date = req.body.date;
+    const todos = req.body;
+    console.log("reqiest", req.headers, todos, "sssssssssssssssssssss");
+    const title = todos.title;
+    const desc = todos.desc;
+    const checked = todos.checked;
+    const date = todos.date;
+    const token = req.headers.authorization.split(" ")[1];
+    console.log("hereee", title, desc, checked, date, token);
+    console.log("token in back", token);
+    const secretKey = process.env.SECRET_KEY;
+    // console.log("request", name, title, desc, checked, date);
+    const decoded = validateToken(token, secretKey);
+    console.log("decode", decoded,decoded.userId);
+    if (decoded?.userId) {
+      const resp = await createTodo({
+        userId: decoded.userId,
+        title: title,
+        desc: desc,
+        checked: checked,
+        date: date,
+      });
 
-    const resp = await createTodo({
-      title: title,
-      desc: desc,
-      checked: checked,
-      date: date,
-    });
-
-    res.status(200).json(resp);
+      res.status(200).json(resp);
+    }
   } catch (e) {
     res.status(500).json({ error: "Todo not created" });
   }
 });
 
 router.get("/", async (req, res) => {
-  const page= +req.query.currentPage || 1
-  const itemsPerPage= +req.query.itemsPerPage || 5
+  console.log("query", req.query);
+  const page = +req.query.currentPage || 1;
+  const itemsPerPage = +req.query.itemsPerPage || 5;
+  const token = req.headers.authorization.split(" ")[1];
+  console.log("token in back", token);
 
+  const secretKey = process.env.SECRET_KEY;
+  console.log('secret key',secretKey)
+  if (token===undefined) {
+    console.log('here inside token checnk')
+    res.status(409).json("Token not found");
+    return
+  }
   try {
 
-    const resp = await getTodos();
-    if (Array.isArray(resp) && resp.length >= 0) {
-      
-      const lastItemIndex = page * itemsPerPage
-      const firstItemIndex= lastItemIndex - itemsPerPage
-      const numberOfProducts = resp.slice(firstItemIndex,lastItemIndex)
-      
-      const totalProductsCount = resp.length;
+    const decoded =  validateToken(token, secretKey);
+    console.log('decoded',decoded)
+    if (decoded?.userId) {
+      console.log("verify", decoded);
+      const resp = await getTodoById(decoded?.userId);
+      console.log('resss7889899989,',resp)
+      if (Array.isArray(resp) && resp.length >= 0 && decoded && Array.isArray(resp[0].todos) ) {
+        const lastItemIndex = page * itemsPerPage;
+        const firstItemIndex = lastItemIndex - itemsPerPage;
+        console.log('res for todos',resp[0].todos)
+        const numberOfProducts = resp[0].todos.slice(firstItemIndex, lastItemIndex);
 
-      res.setHeader("Products-Total-Count", String(totalProductsCount)); // Set the header before sending the response
-      res.status(200).json(numberOfProducts);
-      return
+        
+        const totalProductsCount = resp[0].todos.length;
+        console.log('number',numberOfProducts)
+        res.setHeader("Products-Total-Count", String(totalProductsCount)); // Set the header before sending the response
+        res.status(200).json(numberOfProducts);
+        return;
+      }
+      // if (res?.length===0) res.status(404).json({ message: "No data found" });
+      res.status(200).json([]);
     }
-    // if (res?.length===0) res.status(404).json({ message: "No data found" });
-    res.status(200).json([]);
   } catch (error) {
-    res.status(500).json({ error: "Todo not found" });
+    console.log("error", error);
+    res.status(500).json({ error: "Token expired" });
   }
 });
 
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
-  console.log(id)
+  const token = req.headers.authorization.split(" ")[1];
+  const secretKey = process.env.SECRET_KEY;
+
+  console.log('idLLLL',id,token);
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });
   }
   try {
-    const todo = await getTodoById(id);
+    const decoded =  validateToken(token, secretKey);
+    console.log('decoded',decoded)
+    if (decoded?.userId) {
+      console.log("verify", decoded);
+      const resp = await getTodoById(decoded?.userId);
+      console.log('resss,',resp)
+      if (Array.isArray(resp) && resp.length >= 0 && decoded.userId) {
+        const [todos] =resp
+        console.log('todos',todos.todos)
+        const filterTodo = todos.todos.filter((todo,index)=>todo._id.toString() === id)
+        console.log('filter',filterTodo)
+        res.status(200).json(filterTodo);
+        return
+      }
+      else{
+        res.status(404).json('Todo not found')
+        return
+      }
+  }
+  else{
+    res.status(404).json({ error: "Token failed" });
+    return
+  }
 
-    res.status(200).json(todo);
+
   } catch (e) {
     res.status(404).json({ error: "Todo by id not found" });
   }
@@ -74,17 +130,19 @@ router.get("/:id", async (req, res) => {
 
 router.put("/:id", async (req, res) => {
   const id = req.params.id;
-  const todo = req.body;
-
+  const getTodo = req.body;
+  const token = req.headers && req.headers.authorization.split(" ")[1];
+  const secretKey = process.env.SECRET_KEY;
+  console.log('check inside edit',id,getTodo,token)
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });
     return;
   }
   if (
-    todo.title === undefined ||
-    todo.desc === undefined ||
-    todo.checked === undefined ||
-    todo.date === undefined
+    getTodo.title === undefined ||
+    getTodo.desc === undefined ||
+    getTodo.checked === undefined ||
+    getTodo.date === undefined
   ) {
     res.status(400).json({ error: "the request body is not valid" });
     return;
@@ -98,8 +156,15 @@ router.put("/:id", async (req, res) => {
   }
 
   try {
-    const updatedtodo = await updateTodo(id, todo);
+    const decoded =  validateToken(token, secretKey);
+    console.log('decoded',decoded)
+    const {userId} = decoded
+    if (userId) {
+      console.log("verify,updatij...", decoded);
+      // console.log('resss,',resp)
+    const updatedtodo = await updateTodo(userId, getTodo);
     res.status(200).json(updatedtodo);
+    }
   } catch (e) {
     res.status(400).json({ error: "check for error" });
   }
@@ -107,6 +172,8 @@ router.put("/:id", async (req, res) => {
 
 router.delete("/:id", async (req, res) => {
   const id = req.params.id;
+  const token = req.headers && req.headers.authorization.split(" ")[1];
+  const secretKey = process.env.SECRET_KEY;
 
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });
@@ -119,8 +186,15 @@ router.delete("/:id", async (req, res) => {
     return;
   }
   try {
-    const deletedtodo = await removeTodo(id);
+    const decoded =  validateToken(token, secretKey);
+    console.log('decoded',decoded)
+    const {userId} = decoded
+    if (userId) {
+      console.log("verify,updatij...", decoded);
+      // console.log('resss,',resp)
+    const deletedtodo = await removeTodo(id,userId);
     res.status(200).json(deletedtodo);
+    }
   } catch (e) {
     res.status(500).json({ error: e });
   }
