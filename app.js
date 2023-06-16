@@ -30,6 +30,12 @@ app.use(
 //   })
 // );
 
+// register routes 
+app.use('/todos',todoRoutes)
+app.use("/", userRoutes);
+app.use("*", (req, res) => {
+  res.status(404).json({ error: "route Not found" });
+});
 
 app.get("/todos", (req, res) => {
   const token =
@@ -38,49 +44,8 @@ app.get("/todos", (req, res) => {
     req.headers.authorization.split(" ")[1];
 
   if (!token) {
-    return res.redirect("/login");
+    return res.status(409).json("Token not found");
   }
-
-});
-
-// function authenticateToken(req, res, next) {
-//   const authHeader = req.headers.authorization;
-//   const token = authHeader && authHeader.split(" ")[1];
-
-//   // Exclude token check for login and registration routes
-//   if (req.path === "/login" || req.path === "/register") {
-//     return next();
-//   }
-
-//   if (!token) {
-//     return res.status(401).json({ message: "Unauthorized" });
-//   }
-
-//   jwt.verify(token, secretKey, (err, user) => {
-//     if (err) {
-//       if (err.name === "TokenExpiredError") {
-//         return res.status(401).json({ message: "Token expired" });
-//       } else {
-//         return res.status(403).json({ message: "Forbidden" });
-//       }
-//     }
-
-//     // Token is valid, attach user information to the request
-//     req.user = user;
-
-//     next();
-//   });
-// }
-
-// Apply the middleware globally to all routes
-// app.use(authenticateToken);
-
-
-// register routes 
-app.use('/todos',todoRoutes)
-app.use("/", userRoutes);
-app.use("*", (req, res) => {
-  res.status(404).json({ error: "route Not found" });
 });
 
 console.log('port',port)

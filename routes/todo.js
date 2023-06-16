@@ -45,19 +45,20 @@ router.post("/create-todo", async (req, res) => {
 });
 
 router.get("/", async (req, res) => {
+  console.log('request called')
   console.log("query", req.query);
   const page = +req.query.currentPage || 1;
   const itemsPerPage = +req.query.itemsPerPage || 5;
   const authorizationHeader = req.headers && req.headers.authorization;
   if (!authorizationHeader) {
-    return res.redirect("/login");
+    return res.status(409).json('Token not found');
     // Handle the case where authorization header is missing
     // For example, return an error response or redirect to a login page
   }
   const token = authorizationHeader.split(" ")[1];
-  console.log("token in back", token);
+  
   const secretKey = process.env.SECRET_KEY;
-  console.log("secret key", secretKey);
+ 
   if (!token) {
     console.log("here inside token checnk");
     res.status(409).json("Token not found");
@@ -65,11 +66,11 @@ router.get("/", async (req, res) => {
   }
   try {
     const decoded = validateToken(token, secretKey);
-    console.log("decoded", decoded);
+    
     if (decoded?.userId) {
-      console.log("verify", decoded);
+      
       const resp = await getTodoById(decoded?.userId);
-      console.log("resss7889899989,", resp);
+      
       if (
         Array.isArray(resp) &&
         resp.length >= 0 &&
@@ -78,14 +79,14 @@ router.get("/", async (req, res) => {
       ) {
         const lastItemIndex = page * itemsPerPage;
         const firstItemIndex = lastItemIndex - itemsPerPage;
-        console.log("res for todos", resp[0].todos);
+        // console.log("res for todos", resp[0].todos);
         const numberOfProducts = resp[0].todos.slice(
           firstItemIndex,
           lastItemIndex
         );
 
         const totalProductsCount = resp[0].todos.length;
-        console.log("number", numberOfProducts);
+        // console.log("number", numberOfProducts);
         res.setHeader("Products-Total-Count", String(totalProductsCount)); // Set the header before sending the response
         res.status(200).json(numberOfProducts);
         return;
@@ -101,9 +102,14 @@ router.get("/", async (req, res) => {
 
 router.get("/:id", async (req, res) => {
   const id = req.params.id;
-  const token = req.headers.authorization.split(" ")[1];
+  const authorizationHeader = req.headers && req.headers.authorization;
+  if (!authorizationHeader) {
+    return res.status(409).json("Token not found");
+    // Handle the case where authorization header is missing
+    // For example, return an error response or redirect to a login page
+  }
   const secretKey = process.env.SECRET_KEY;
-
+  const token = authorizationHeader.split(" ")[1]
   console.log("idLLLL", id, token);
   if (!id) {
     res.status(400).json({ error: "no valid id is given" });

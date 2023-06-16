@@ -62,10 +62,10 @@ const validation = (username, password) => {
 function validateToken(token,secretKey) {
   try {
     // Verify the token and decode its payload
-    console.log('inside validate token funcion',token,secretKey)
+  
     const decoded = jwt.verify(token, secretKey);
 
-    console.log('token check',decoded)
+
     // Check if the token has expired
     const currentTime = Math.floor(Date.now() / 1000);
     if (decoded.exp < currentTime) {
