@@ -4,7 +4,7 @@ const app = express();
 const todoRoutes = require("./routes/todo");
 const userRoutes = require('./routes/user')
 const port = process.env.PORT || 3000;
-
+const build = require('../fullstack-todo-app-frontend/dist/')
 
 app.use(express.json());
 
@@ -37,10 +37,12 @@ app.use("*", (req, res) => {
   res.status(404).json({ error: "route Not found" });
 });
 
-app.use(express.static(path.join(__dirname, "public/")));
+app.use(express.static(path.join(__dirname, `${build}`)));
 
 app.get("/*", function (req, res) {
-  res.sendFile(path.join(__dirname, "public/", "index.html"));
+  res.sendFile(
+    path.join(__dirname, `${build}`, "index.html")
+  );
 });
 
 app.get("/todos", (req, res) => {

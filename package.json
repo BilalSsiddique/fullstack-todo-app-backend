@@ -16,6 +16,7 @@
     "mongodb-connection-string-url": "^2.6.0",
     "mongoose": "^7.2.2",
     "nodemon": "^2.0.22",
+    "path": "^0.12.7",
     "punycode": "^2.3.0",
     "saslprep": "^1.0.3",
     "smart-buffer": "^4.2.0",
