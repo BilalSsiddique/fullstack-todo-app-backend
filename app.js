@@ -4,7 +4,7 @@ const app = express();
 const todoRoutes = require("./routes/todo");
 const userRoutes = require('./routes/user')
 const port = process.env.PORT || 3000;
-const build = require('../fullstack-todo-app-frontend/dist/')
+const build = require('./dist')
 
 app.use(express.json());
 
