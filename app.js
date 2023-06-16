@@ -12,7 +12,7 @@ const allowedOrigins = [
   "http://localhost:3000",
   "http://192.168.157.80:3000",
   "http://127.0.0.1:5173",
-  "https://fullstack-todo-app-frontend.vercel.app/", // Replace with your Vercel deployment URL
+  "https://fullstack-todo-app-frontend.vercel.app", // Replace with your Vercel deployment URL
 ];
 
 app.use(
